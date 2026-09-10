@@ -1,0 +1,8 @@
+flask
+flask-cors
+google-generativeai>=0.4.0
+requests
+python-dotenv
+beautifulsoup4
+zxing-cpp>=3.0.0
+pillow>=10.0.0

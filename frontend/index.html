@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>An AI-driven semantic framework for web threat detection and security intelligence</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css?v=3.7" />
+</head>
+
+<body>
+  <div class="app-root">
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="header-icon">🛡️</div>
+        <div>
+          <h1 class="header-title">An AI-driven semantic framework for web threat detection and security intelligence</h1>
+          <p class="header-subtitle">
+            Educational security scanner &mdash; only scan websites you own or have explicit permission to test.
+          </p>
+        </div>
+      </div>
+
+      <!-- Mode Switcher Navigation -->
+      <nav class="mode-nav">
+        <button id="mode-web-btn" class="mode-btn mode-active">
+          <span class="mode-icon">🌐</span> Website Security Scanner
+        </button>
+        <button id="mode-barcode-btn" class="mode-btn">
+          <span class="mode-icon">🏷️</span> Barcode &amp; QR Inspector
+        </button>
+      </nav>
+    </header>
+
+    <!-- Main Layout: Web Scanner View -->
+    <main id="view-web-scanner" class="app-main">
+      <!-- Left: Scan Controls + Scan Summary -->
+      <section class="panel panel-left">
+        <div class="panel-header">
+          <div class="panel-icon">🛠️</div>
+          <h2 class="panel-title">Scan Controls</h2>
+        </div>
+
+        <label class="field-label" for="url-input">Website URL</label>
+        <div class="url-input-wrapper">
+          <span class="url-input-icon">🔗</span>
+          <input id="url-input" type="text" placeholder="https://example.com" autocomplete="off" />
+        </div>
+
+        <button id="scan-button" class="scan-button">
+          <span id="scan-button-text">Scan Website</span>
+          <span id="scan-button-spinner" class="spinner hidden"></span>
+        </button>
+
+        <div id="error-message" class="error-message hidden"></div>
+
+        <!-- Recent Scans History -->
+        <div id="recent-scans-wrapper" class="recent-scans-wrapper hidden">
+          <label class="field-label" for="recent-scans-select">Recent Scans</label>
+          <div class="recent-scans-row">
+            <select id="recent-scans-select" class="recent-scans-select">
+              <option value="">Choose previous scan...</option>
+            </select>
+            <button id="clear-history-btn" class="clear-history-btn" title="Clear Scan History">🗑️</button>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <div class="info-icon">ℹ️</div>
+          <div>
+            <div class="info-title">Ethical Use Reminder</div>
+            <p class="info-text">
+              This tool performs passive, read-only security checks. Only scan websites you own or have explicit written
+              permission to test.
+            </p>
+          </div>
+        </div>
+
+        <!-- Scan Summary (below Scan Controls) -->
+        <div id="scan-summary-container" class="results-top hidden">
+          <div class="summary-header">
+            <h2 class="panel-title">Scan Summary</h2>
+            <span id="scan-status" class="status-pill status-completed">Completed</span>
+          </div>
+
+          <div class="summary-meta">
+            <span id="scan-url-label"></span>
+            <span id="scan-time-label"></span>
+          </div>
+
+          <!-- Security Health Score Box -->
+          <div id="security-score-card" class="security-score-box">
+            <div class="score-circle-wrapper">
+              <div id="score-circle" class="score-circle">
+                <span id="score-value">--</span>
+                <span class="score-max">/100</span>
+              </div>
+            </div>
+            <div class="score-info">
+              <div class="score-title">Security Posture Score</div>
+              <div class="score-grade-wrapper">
+                <span class="score-grade-label">Grade:</span>
+                <span id="score-grade" class="score-grade-badge grade-a">--</span>
+                <span id="score-status-text" class="score-status-text">Pending scan</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-grid">
+            <div class="summary-card summary-card-neutral">
+              <div class="summary-label">Total Issues</div>
+              <div id="summary-total" class="summary-value">0</div>
+            </div>
+            <div class="summary-card summary-card-high">
+              <div class="summary-label">High Severity</div>
+              <div id="summary-high" class="summary-value">0</div>
+            </div>
+            <div class="summary-card summary-card-medium">
+              <div class="summary-label">Medium Severity</div>
+              <div id="summary-medium" class="summary-value">0</div>
+            </div>
+            <div class="summary-card summary-card-low">
+              <div class="summary-label">Low Severity</div>
+              <div id="summary-low" class="summary-value">0</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: Results -->
+      <section class="panel panel-right">
+        <!-- Placeholder before scan -->
+        <div id="placeholder" class="placeholder">
+          <div class="placeholder-icon">📄</div>
+          <h2 class="placeholder-title">No scan yet</h2>
+          <p class="placeholder-text">
+            Enter a URL and click <strong>Scan Website</strong> to begin.
+          </p>
+        </div>
+
+        <!-- Results wrapper (hidden until we have data) -->
+        <div id="results-wrapper" class="results-wrapper hidden">
+          <!-- Tabs + Download button -->
+          <div class="results-tabs-header">
+            <div class="tabs-left">
+              <h3 id="vuln-tab" class="section-title tab-toggle tab-active">
+                🛡️ Detected Issues <span id="vuln-count-badge" class="tab-badge">0</span>
+              </h3>
+              <h3 id="ai-tab" class="section-title tab-toggle tab-inactive">
+                🤖 AI Auditor Report
+              </h3>
+            </div>
+
+            <button id="export-pdf-btn" class="export-button hidden">
+              📥 Download Executive PDF
+            </button>
+          </div>
+
+          <!-- Filter & Search Toolbar -->
+          <div class="results-toolbar">
+            <div class="filter-pills-wrapper">
+              <button class="filter-pill filter-active" data-filter="all">All (<span id="filter-count-all">0</span>)</button>
+              <button class="filter-pill filter-high" data-filter="high">🔴 High (<span id="filter-count-high">0</span>)</button>
+              <button class="filter-pill filter-medium" data-filter="medium">🟠 Med (<span id="filter-count-medium">0</span>)</button>
+              <button class="filter-pill filter-low" data-filter="low">🟢 Low (<span id="filter-count-low">0</span>)</button>
+            </div>
+            <div class="search-box-wrapper">
+              <span class="search-icon">🔍</span>
+              <input id="vuln-search-input" type="text" placeholder="Search issues..." autocomplete="off" />
+            </div>
+          </div>
+
+          <!-- Content area: one panel visible at a time -->
+          <div class="results-columns">
+            <div class="vuln-list-column" id="vuln-column">
+              <div id="vulnerabilities-container" class="vuln-list"></div>
+            </div>
+
+            <div class="ai-column hidden" id="ai-column">
+              <div id="ai-analysis" class="ai-box"></div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </main>
+
+    <!-- Barcode & QR Inspector Layout -->
+    <main id="view-barcode-inspector" class="app-main hidden">
+      <!-- Left: Barcode Input Controls -->
+      <section class="panel panel-left">
+        <div class="panel-header">
+          <div class="panel-icon">🏷️</div>
+          <h2 class="panel-title">Barcode / QR Input</h2>
+        </div>
+
+        <div class="barcode-input-tabs">
+          <button id="bc-tab-upload" class="bc-tab-btn bc-tab-active">📁 Upload Image</button>
+          <button id="bc-tab-camera" class="bc-tab-btn">📷 Live Camera</button>
+          <button id="bc-tab-paste" class="bc-tab-btn">📋 Paste Text</button>
+        </div>
+
+        <!-- Mode 1: File Upload -->
+        <div id="bc-panel-upload" class="bc-input-panel">
+          <div id="drop-zone" class="drop-zone">
+            <div class="drop-zone-icon">📥</div>
+            <div class="drop-zone-text">Drop barcode or QR image here</div>
+            <div class="drop-zone-sub">or click to browse from device</div>
+            <input type="file" id="barcode-file-input" accept="image/*" class="file-input-hidden" />
+          </div>
+          <div id="file-preview-wrapper" class="file-preview-wrapper hidden">
+            <img id="file-preview-img" alt="Uploaded code preview" />
+            <button id="file-clear-btn" class="file-clear-btn">✕ Choose Another Image</button>
+          </div>
+        </div>
+
+        <!-- Mode 2: Camera Scanner -->
+        <div id="bc-panel-camera" class="bc-input-panel hidden">
+          <div class="camera-controls">
+            <button id="camera-start-btn" class="scan-button">
+              <span id="camera-start-btn-text">Start Camera Scanner</span>
+              <span id="camera-start-btn-spinner" class="spinner hidden"></span>
+            </button>
+            <button id="camera-snap-btn" class="scan-button hidden" style="background: linear-gradient(135deg, #059669, #10b981) !important;">📸 Snap &amp; AI Inspect</button>
+            <button id="camera-stop-btn" class="scan-button btn-secondary hidden">Stop Camera</button>
+          </div>
+          <div id="camera-status-banner" class="pulsing-status hidden"></div>
+          <div id="qr-reader" class="camera-viewfinder"></div>
+          <p class="info-text" style="margin-top:8px;">Center barcode or QR code inside the viewfinder camera.</p>
+        </div>
+
+        <!-- Mode 3: Paste Text -->
+        <div id="bc-panel-paste" class="bc-input-panel hidden">
+          <label class="field-label" for="barcode-raw-text">Raw Barcode / QR Payload</label>
+          <textarea id="barcode-raw-text" class="barcode-textarea" rows="4" placeholder="Paste decoded text, numbers (e.g. 3 337875 597371), upi://pay, or URL..."></textarea>
+          <button id="inspect-text-btn" class="scan-button" style="margin-top:10px;">
+            <span id="inspect-text-btn-text">Inspect Payload</span>
+            <span id="inspect-text-btn-spinner" class="spinner hidden"></span>
+          </button>
+          <div id="paste-status-banner" class="pulsing-status hidden"></div>
+        </div>
+
+        <div id="bc-error-message" class="error-message hidden"></div>
+
+        <div class="info-box">
+          <div class="info-icon">💡</div>
+          <div>
+            <div class="info-title">Supported Code Types</div>
+            <p class="info-text">
+              Detects QR Code, UPC, EAN, Code 128, Data Matrix. Analyzes payment links (UPI, Crypto, PayPal), URLs (phishing/quishing checks), Wi-Fi logins, and detects expiration dates.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: Barcode Inspection Results -->
+      <section class="panel panel-right">
+        <!-- Placeholder before scan -->
+        <div id="bc-placeholder" class="placeholder">
+          <div class="placeholder-icon">🏷️</div>
+          <h2 class="placeholder-title">No barcode inspected yet</h2>
+          <p class="placeholder-text">
+            Upload an image, scan with your webcam, or paste payload text to analyze purpose, safety, and validity.
+          </p>
+        </div>
+
+        <!-- Barcode Results Box -->
+        <div id="bc-results-wrapper" class="results-wrapper hidden">
+          <div class="bc-header-card">
+            <div class="bc-title-row">
+              <div class="bc-category-title">
+                <span id="bc-category-icon" class="bc-cat-icon">💳</span>
+                <div>
+                  <h2 id="bc-category-name" class="bc-cat-name">Payment &amp; Banking</h2>
+                  <span id="bc-subtype" class="bc-sub-type">UPI Payment Link</span>
+                </div>
+              </div>
+              <div class="bc-badges-group">
+                <span id="bc-format-badge" class="bc-format-pill">QR_CODE</span>
+                <span id="bc-safety-badge" class="severity-pill severity-low">Safe</span>
+              </div>
+            </div>
+
+            <!-- Expiry Alert Banner -->
+            <div id="bc-expiry-banner" class="bc-expiry-banner">
+              <span id="bc-expiry-icon">⏰</span>
+              <div id="bc-expiry-text">Static Payload - No Expiry Embedded</div>
+            </div>
+          </div>
+
+          <!-- Download Barcode Report Button -->
+          <button id="bc-export-pdf-btn" class="export-pdf-btn hidden" title="Download Barcode Inspection Report as PDF">
+            📥 Download Barcode Report
+          </button>
+
+          <!-- Product Showcase Card (shown when retail product is identified) -->
+          <div id="bc-product-card" class="bc-product-card hidden">
+            <img id="bc-product-img" class="bc-product-img hidden" alt="Product Thumbnail" />
+            <div class="bc-product-info">
+              <span id="bc-product-brand" class="bc-product-brand-badge">Brand</span>
+              <h3 id="bc-product-title" class="bc-product-title">Product Name</h3>
+              <div id="bc-product-meta" class="bc-product-meta"></div>
+            </div>
+          </div>
+
+          <!-- Structured Details Table -->
+          <div class="bc-section-heading">Detailed Attributes &amp; Purpose</div>
+          <div id="bc-details-container" class="bc-details-grid"></div>
+
+          <!-- Decoded Raw Content Box -->
+          <div class="bc-section-heading">Raw Decoded Content</div>
+          <div class="code-snippet-box">
+            <div class="code-snippet-header">
+              <span class="code-snippet-lang">Decoded Payload</span>
+              <button id="bc-copy-raw-btn" class="copy-snippet-btn">📋 Copy</button>
+            </div>
+            <pre class="code-snippet-pre"><code id="bc-raw-content"></code></pre>
+          </div>
+
+          <!-- AI Security & Quishing Audit -->
+          <div class="bc-section-heading">🤖 AI Security &amp; Threat Intelligence Audit</div>
+          <div id="bc-ai-analysis-box" class="ai-box"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      ⚠️ This tool is for educational purposes only. Do not scan systems without authorization.
+    </footer>
+  </div>
+  <!-- jsQR for pure canvas QR decoding (handles central logos e.g. GPay/UPI reliably) -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+  <!-- html5-qrcode for client-side barcode and QR decoding -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <!-- jsPDF for client-side PDF generation -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="script.js?v=3.7"></script>
+
+</body>
+
+</html>
+
+
+<!-- This is an HTML comment -->
+<!-- To start the backend run:
+
+cd backend 
+python app.py
+
+To run the frontend:
+
+In new tab :
+
+start frontend/index.html
+
+-->

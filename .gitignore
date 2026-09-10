@@ -1,0 +1,33 @@
+# Python Virtual Environments
+venv/
+backend/venv/
+.venv/
+env/
+ENV/
+
+# Python Cache & Bytecode
+__pycache__/
+*.py[cod]
+*.class
+*.pyc
+
+# Environment & Secret Files (Prevents API key leaks)
+.env
+backend/.env
+backend/vulnerabilities/.env
+*.env.local
+
+# IDE & Editor Settings
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS Generated Files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Temporary & Output Files
+*.log
+backend/*.log
