@@ -1,11 +1,17 @@
 // === CONFIG & API BASE ===
-// The Python Flask server is hosted on port 5000 (localhost / 127.0.0.1)
 function resolveApiBase() {
-  if (window.location.protocol.startsWith("http") && window.location.port === "5000") {
+  // When deployed on Vercel, Flask and the frontend share the same origin.
+  if (window.location.protocol.startsWith("http")) {
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+      return "http://127.0.0.1:5000";
+    }
+
     return window.location.origin;
   }
+
   return "http://127.0.0.1:5000";
 }
+
 let API_BASE = resolveApiBase();
 
 // Universal API fetch helper with automatic port 5000 fallback (handles VS Code Live Server, IIS, etc.)
